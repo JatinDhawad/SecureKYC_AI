@@ -1,0 +1,58 @@
+# Python / Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Data & Model Checkpoints
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.pt
+*.pth
+*.onnx
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Web App Artifacts
+app/static/downloads/
+
+# Local-only / large / private
+_archive_local/
+DeepFaceLive/
+scratch/
+data/
+checkpoints/*.task
+.venv/
+__pycache__/
+*.bak*
+*.pre_*
+*.orig
+.DS_Store
+docs/*.pre_*
+paper/*.docx
+paper/*.pdf
+
+# Added for private repo
+DeepFaceLive/
+data/
+scratch/
+Jatin.mov
+paper/_chk_*.png
+*.pre_*
+*.pdf.pre_batch6
+.agents/
+.env
+*.env
+
+_trash_review/
+run_demo.command

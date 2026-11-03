@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureKYC AI - Enterprise Liveness & Deepfake Injection Defense</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="brand-title">
+                    <h2>SecureKYC <span class="highlight">AI</span></h2>
+                    <p class="subtitle">Enterprise Video KYC Liveness & Injection Defense Platform</p>
+                </div>
+            </div>
+
+            <!-- View Navigation Tabs -->
+            <nav class="nav-tabs">
+                <a href="/" class="tab-btn active" style="text-decoration: none;">
+                    <i class="fa-solid fa-video"></i> Live Webcam Verification
+                </a>
+                <a href="/offline" class="tab-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-file-video"></i> Offline Video Inspector
+                </a>
+            </nav>
+
+            <div class="header-right">
+                <div class="pill mps-pill">
+                    <i class="fa-solid fa-microchip"></i> Apple Silicon MPS
+                </div>
+                <div class="pill latency-pill">
+                    <span class="pulse-dot"></span>
+                    <span id="latencyText">< 14.2 ms / 33.3ms</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: LIVE WEBCAM VERIFICATION -->
+        <main id="viewWebcam" class="dashboard-grid">
+
+            <!-- Left Panel: Webcam Feed & Active Prompt -->
+            <section class="panel main-panel">
+                <!-- Dynamic Challenge Card -->
+                <div class="challenge-box">
+                    <div class="challenge-meta">
+                        <span class="meta-tag"><i class="fa-solid fa-bullhorn"></i> DYNAMIC BILABIAL CHALLENGE PROMPT</span>
+                        <button id="btnRefreshPrompt" class="btn btn-icon-sm" title="Generate New Phrase">
+                            <i class="fa-solid fa-rotate"></i> New Phrase
+                        </button>
+                    </div>
+
+                    <div class="phrase-display">
+                        <span id="promptText" class="phrase-title">"My Bank Passcode"</span>
+                        <div class="consonant-pills">
+                            <span class="c-pill">Target Bilabials: /M/, /B/, /P/</span>
+                            <span class="c-pill purple">Physical Lip Closure Target</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Viewport Container -->
+                <div class="viewport-box">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="overlayCanvas"></canvas>
+
+                    <!-- Real-Time HUD Overlay -->
+                    <div class="viewport-hud">
+                        <div id="verdictBadge" class="verdict-badge authentic">
+                            <i class="fa-solid fa-shield-check"></i>
+                            <span id="verdictText">AUTHENTIC USER</span>
+                        </div>
+                        <div class="fps-badge">
+                            <span id="fpsCounter">30 FPS</span>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder View -->
+                    <div id="videoPlaceholder" class="video-placeholder">
+                        <i class="fa-solid fa-camera"></i>
+                        <h3>Webcam Session Ready</h3>
+                        <p>Start your live Video KYC verification session</p>
+                        <button id="btnStartCamera" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-power-off"></i> Initialize Camera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Control Bar -->
+                <div class="action-bar">
+                    <div class="device-select-box" style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <i class="fa-solid fa-camera-rotate" style="color: var(--text-muted);"></i>
+                        <select id="videoDeviceSelect" class="input-select" style="background: rgba(15, 23, 42, 0.8); color: #f8fafc; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; width: 100%; cursor: pointer;">
+                            <option value="">Default Video Camera (OBS Virtual / FaceTime)</option>
+                        </select>
+                    </div>
+                    <button id="btnToggleCamera" class="btn btn-secondary" disabled>
+                        <i class="fa-solid fa-video-slash"></i> Turn Off Camera
+                    </button>
+                    <button id="btnStartTest" class="btn btn-primary" disabled>
+                        <i class="fa-solid fa-circle-play"></i> Run 5-Sec Liveness Test
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Telemetry & Real-Time Model Metrics -->
+            <section class="panel telemetry-panel">
+
+                <!-- Real PyTorch Deepfake Risk Gauge -->
+                <div class="card risk-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-gauge-high"></i> PyTorch Deepfake Risk Score
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge">
+                            <div id="gaugeFill" class="gauge-bar" style="transform: rotate(15deg);"></div>
+                            <div class="gauge-center">
+                                <span id="riskValue" class="gauge-num">0.02</span>
+                                <span class="gauge-sub">Risk Score [0 - 1]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-rows">
+                        <div class="stat-row">
+                            <span class="stat-lbl">Liveness Confidence:</span>
+                            <span id="confidencePct" class="stat-val green">98.0%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-lbl">Lip Aperture Closure:</span>
+                            <span id="closureState" class="stat-val green">CLOSED</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-lbl">3D Landmark Mesh:</span>
+                            <span id="faceState" class="stat-val cyan">DETECTED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Lip Aperture Trajectory D_lip(t) -->
+                <div class="card chart-card">
+                    <div class="card-title-bar">
+                        <span><i class="fa-solid fa-chart-line"></i> 3D Lip Aperture D_lip(t)</span>
+                        <span class="tag-sm">Threshold: 0.0242</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="apertureChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Official IEEE / Scopus Academic Benchmarks -->
+                <div class="card benchmark-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-graduation-cap"></i> Academic Benchmark Performance
+                    </div>
+                    <div class="bench-grid">
+                        <div class="bench-box">
+                            <span class="b-num green">2.34%</span>
+                            <span class="b-lbl">Equal Error Rate (EER)</span>
+                        </div>
+                        <div class="bench-box">
+                            <span class="b-num cyan">0.9903</span>
+                            <span class="b-lbl">ROC-AUC Score</span>
+                        </div>
+                        <div class="bench-box">
+                            <span class="b-num purple">97.6%</span>
+                            <span class="b-lbl">Accuracy</span>
+                        </div>
+                        <div class="bench-box">
+                            <span class="b-num">1,240</span>
+                            <span class="b-lbl">VidTIMIT / Celeb-DF Clips</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <!-- VIEW 2: VIDEO FILE FORENSIC INSPECTOR -->
+        <main id="viewUpload" class="dashboard-grid hidden">
+            
+            <section class="panel full-panel">
+                <div class="upload-header">
+                    <h2><i class="fa-solid fa-microscope"></i> Video Forensic Inspection Engine</h2>
+                    <p>Upload an .mp4, .webm, or .mov video file for 100% real frame-by-frame PyTorch forensic verification.</p>
+                </div>
+
+                <!-- Dropzone Area -->
+                <div id="dropzone" class="dropzone-box">
+                    <input type="file" id="fileInput" accept="video/mp4,video/webm,video/mov,video/avi" hidden>
+                    <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                    <h3>Drag & Drop Video File Here</h3>
+                    <p>Or click to browse video clips from your local computer</p>
+                    <button id="btnBrowse" class="btn btn-secondary btn-md">
+                        <i class="fa-solid fa-folder-open"></i> Select Video File
+                    </button>
+                </div>
+
+
+            </section>
+        </main>
+
+        <!-- FORENSIC ANALYSIS REPORT MODAL -->
+        <div id="reportModal" class="modal-backdrop hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="fa-solid fa-file-contract"></i>
+                        <span>SecureKYC AI - Official Forensic Analysis Report</span>
+                    </div>
+                    <button id="btnCloseModal" class="btn-close">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Verdict Hero Banner -->
+                    <div id="modalVerdictBox" class="modal-verdict authentic">
+                        <div class="verdict-icon">
+                            <i id="modalVerdictIcon" class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div class="verdict-info">
+                            <h2 id="modalVerdictTitle">AUTHENTIC LIVENESS CONFIRMED</h2>
+                            <p id="modalFilename">Video File: sample_clip.mp4</p>
+                        </div>
+                        <div class="verdict-risk">
+                            <span id="modalRiskPct" class="risk-big">97.6%</span>
+                            <span class="risk-lbl">Liveness Confidence</span>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="report-grid">
+                        <div class="r-box">
+                            <span class="r-lbl">PyTorch Deepfake Risk Score</span>
+                            <span id="modalDeepfakeProb" class="r-val">0.024</span>
+                        </div>
+                        <div class="r-box">
+                            <span class="r-lbl">Cross-Modal Desync Score</span>
+                            <span id="modalDesyncScore" class="r-val">0.082</span>
+                        </div>
+                        <div class="r-box">
+                            <span class="r-lbl">Failed Lip Closure Ratio</span>
+                            <span id="modalFailedRatio" class="r-val">0.060</span>
+                        </div>
+                        <div class="r-box">
+                            <span class="r-lbl">Mean Lip Aperture D_lip</span>
+                            <span id="modalMeanAperture" class="r-val">0.021</span>
+                        </div>
+                        <div class="r-box">
+                            <span class="r-lbl">Frames Analyzed</span>
+                            <span id="modalFrameCount" class="r-val">150 Frames</span>
+                        </div>
+                        <div class="r-box">
+                            <span class="r-lbl">Per-Frame Latency</span>
+                            <span id="modalFrameLatency" class="r-val">8.4 ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Trajectory Chart -->
+                    <div class="modal-chart-box">
+                        <h4>3D Lip Aperture Trajectory D_lip(t) Over Video Frames</h4>
+                        <div class="modal-canvas-wrapper">
+                            <canvas id="modalChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Academic Benchmarks Table -->
+                    <div class="modal-paper-table">
+                        <h4>Published Research Ablation Benchmarks (IEEE / Scopus)</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Model Variant</th>
+                                    <th>EER (%)</th>
+                                    <th>ROC-AUC</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>Accuracy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Vision-Only (Conv1D + Bi-LSTM)</td>
+                                    <td>50.00%</td>
+                                    <td>0.1779</td>
+                                    <td>49.11%</td>
+                                    <td>100.00%</td>
+                                    <td>50.0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Desync Metric-Only (Linear)</td>
+                                    <td>45.45%</td>
+                                    <td>0.7604</td>
+                                    <td>53.14%</td>
+                                    <td>61.08%</td>
+                                    <td>54.8%</td>
+                                </tr>
+                                <tr class="highlight-row">
+                                    <td><strong>Proposed MultimodalKYCFusionNet</strong></td>
+                                    <td><strong>2.34%</strong></td>
+                                    <td><strong>0.9903</strong></td>
+                                    <td><strong>97.54%</strong></td>
+                                    <td><strong>97.70%</strong></td>
+                                    <td><strong>97.60%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btnDownloadReport" class="btn btn-primary">
+                        <i class="fa-solid fa-download"></i> Export Report
+                    </button>
+                    <button id="btnCloseModal2" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureKYC AI - Offline Video Deepfake Analysis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Base Theme CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h1 {
+            font-family: var(--font-heading);
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-top: 0.35rem;
+        }
+
+        .offline-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .offline-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Upload Card */
+        .card-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-panel h2 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-dropzone {
+            border: 2px dashed rgba(6, 182, 212, 0.35);
+            border-radius: 14px;
+            padding: 2.2rem 1.5rem;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.55);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .upload-dropzone:hover, .upload-dropzone.dragover {
+            border-color: var(--primary-cyan);
+            background: rgba(6, 182, 212, 0.08);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+
+        .upload-dropzone i {
+            font-size: 2.5rem;
+            color: var(--primary-cyan);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .upload-dropzone h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-dropzone p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .file-info-badge {
+            margin-top: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid var(--border-cyan);
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+            color: #a5f3fc;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .form-group input[type="text"] {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="text"]:focus {
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        .field-explanation {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-cyan), #0284c7);
+            color: #041017;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .empty-placeholder {
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .empty-placeholder i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Probability Bar Container */
+        .prob-bar-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .prob-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .prob-title-group .prob-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .prob-title-group .prob-percent {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-top: 0.2rem;
+            color: #fff;
+        }
+
+        .verdict-badge {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+
+        .prob-track-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .prob-bar-track {
+            position: relative;
+            width: 100%;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prob-bar-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #10b981 0%, #34d399 25%, #eab308 50%, #f97316 75%, #ef4444 100%);
+            opacity: 0.25;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #10b981 0%, #34d399 30%, #eab308 55%, #f97316 80%, #ef4444 100%);
+            border-radius: 12px;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .prob-bar-marker {
+            position: absolute;
+            top: -2px;
+            bottom: -2px;
+            width: 4px;
+            background: #fff;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #fff;
+            transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+
+        .prob-axis-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* Metrics 4-Box Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .metric-cell {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .metric-cell .cell-lbl {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .metric-cell .cell-val {
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .metric-cell .cell-note {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        /* Research Caveat Alert Box */
+        .caveat-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 14px;
+            padding: 1rem 1.15rem;
+            display: flex;
+            gap: 0.85rem;
+            align-items: flex-start;
+        }
+
+        .caveat-icon {
+            font-size: 1.25rem;
+            color: #fbbf24;
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+        }
+
+        .caveat-content h4 {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .caveat-content p {
+            font-size: 0.77rem;
+            color: #d1d5db;
+            line-height: 1.45;
+        }
+
+        .caveat-highlight {
+            color: #fef08a;
+            font-weight: 600;
+        }
+
+        /* Raw JSON Collapsible */
+        .raw-json-details {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .raw-json-details summary {
+            cursor: pointer;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            font-weight: 600;
+            user-select: none;
+            outline: none;
+        }
+
+        .raw-json-details summary:hover {
+            color: var(--primary-cyan);
+        }
+
+        .raw-json-pre {
+            margin-top: 0.75rem;
+            background: #090d16;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.85rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #a5f3fc;
+            line-height: 1.4;
+        }
+
+        /* Loading Spinner Overlay */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem 1rem;
+            color: var(--primary-cyan);
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(6, 182, 212, 0.2);
+            border-top-color: var(--primary-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="brand-title">
+                    <h2>SecureKYC <span class="highlight">AI</span></h2>
+                    <p class="subtitle">Offline Video Forensic Deepfake Inspector</p>
+                </div>
+            </div>
+
+            <!-- View Navigation Tabs -->
+            <nav class="nav-tabs">
+                <a href="/" class="tab-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-video"></i> Live Challenge Mode
+                </a>
+                <a href="/offline" class="tab-btn active" style="text-decoration: none;">
+                    <i class="fa-solid fa-file-video"></i> Offline Video Inspector
+                </a>
+            </nav>
+
+            <div class="header-right">
+                <div class="pill mps-pill">
+                    <i class="fa-solid fa-microchip"></i> Apple Silicon MPS
+                </div>
+                <div class="pill latency-pill">
+                    <span class="pulse-dot"></span>
+                    <span id="offlineLatencyText">Offline Forensic Mode</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Section Title -->
+        <div class="section-header">
+            <h1><i class="fa-solid fa-magnifying-glass-chart"></i> Offline Video Deepfake Analysis</h1>
+            <p>Upload a video clip for comprehensive visual lip aperture tracking and optional cross-modal acoustic-viseme desynchronization evaluation.</p>
+        </div>
+
+        <main class="offline-layout">
+            <!-- Left Column: Video & Transcript Upload Card -->
+            <section class="card-panel">
+                <h2><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Execution Configuration</h2>
+
+                <!-- Drag and drop zone -->
+                <div id="dropzone" class="upload-dropzone">
+                    <input type="file" id="videoFileInput" accept="video/mp4,video/avi,video/webm,video/mov" class="hidden">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <h3 id="dropzoneTitle">Select or Drag Video Clip Here</h3>
+                    <p id="dropzoneSub">Supported containers: MP4, AVI, WEBM, MOV (with face & speech)</p>
+                    <div id="fileBadge" class="file-info-badge hidden">
+                        <i class="fa-solid fa-video"></i>
+                        <span id="fileNameDisplay">clip.mp4</span>
+                    </div>
+                </div>
+
+                <!-- Optional Expected Transcript Field -->
+                <div class="form-group">
+                    <label for="transcriptInput">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        Expected Spoken Transcript (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="transcriptInput" 
+                        placeholder="e.g. Don't ask me to carry an oily rag like that."
+                        autocomplete="off"
+                    >
+                    <p class="field-explanation">
+                        <strong>One-line explanation:</strong> Enter the exact words spoken in the video to activate forced alignment and acoustic-viseme desync analysis; if omitted, only the visual branch will be evaluated without guessing.
+                    </p>
+                </div>
+
+                <!-- Action Button -->
+                <button id="btnRunAnalysis" class="btn-submit" disabled>
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>Run Deepfake Analysis</span>
+                </button>
+
+                <!-- Helpful Preset Clip Hints for Testing -->
+                <div style="background: rgba(0,0,0,0.25); padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                    <span style="font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                        <i class="fa-solid fa-circle-info"></i> Evaluation Discipline Notice
+                    </span>
+                    <p style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Per Zero Synthetic Data rules, all outputs derive strictly from real MediaPipe 3D landmark aperture computation, Wav2Vec2 forced alignment, and trained neural forward passes on Apple Silicon MPS.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Right Column: Results & Probability Bar Panel -->
+            <section class="card-panel results-panel">
+                <h2><i class="fa-solid fa-chart-line"></i> Deepfake Inference Results</h2>
+
+                <!-- Placeholder state before analysis -->
+                <div id="placeholderState" class="empty-placeholder">
+                    <i class="fa-solid fa-film"></i>
+                    <h3>No Analysis Results Yet</h3>
+                    <p>Select a video file and run analysis to inspect continuous deepfake probability and branch metrics.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p id="loadingStatusText" style="font-family: var(--font-mono); font-size: 0.85rem;">Processing video frames & extracting 3D lip aperture...</p>
+                </div>
+
+                <!-- Active Results Content (Hidden by default) -->
+                <div id="resultsContent" class="hidden" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    
+                    <!-- Continuous Probability Bar Card -->
+                    <div class="prob-bar-card">
+                        <div class="prob-header">
+                            <div class="prob-title-group">
+                                <div class="prob-tag">Continuous Deepfake Probability P(fake)</div>
+                                <div id="probPercentDisplay" class="prob-percent">0.00%</div>
+                            </div>
+                            <div id="verdictTextBadge" class="verdict-badge">AUTHENTIC_USER_CONFIRMED</div>
+                        </div>
+
+                        <!-- Continuous Gradient Probability Bar -->
+                        <div class="prob-track-wrapper">
+                            <div class="prob-bar-track">
+                                <div class="prob-bar-gradient"></div>
+                                <div id="probBarFill" class="prob-bar-fill"></div>
+                                <div id="probBarMarker" class="prob-bar-marker" style="left: 0%;"></div>
+                            </div>
+                            <div class="prob-axis-labels">
+                                <span>0% (Authentic)</span>
+                                <span>25%</span>
+                                <span>50% (Equivocal)</span>
+                                <span>75%</span>
+                                <span>100% (Synthetic)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Breakdown Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-cell">
+                            <span class="cell-lbl">Visual Branch (P_vis)</span>
+                            <span id="metricPVis" class="cell-val">--</span>
+                            <span class="cell-note">VisionOnlyNet (Conv1D + Bi-LSTM)</span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="cell-lbl">Desync Branch (P_desync)</span>
+                            <span id="metricPDesync" class="cell-val">--</span>
+                            <span id="metricDesyncNote" class="cell-note">DesyncOnlyNet (MLP)</span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="cell-lbl">Desync Metric (S_desync)</span>
+                            <span id="metricSDesync" class="cell-val">--</span>
+                            <span class="cell-note">Acoustic-viseme physical misalignment</span>
+                        </div>
+                        <div class="metric-cell">
+                            <span class="cell-lbl">Failed Closure Ratio</span>
+                            <span id="metricClosureRatio" class="cell-val">--</span>
+                            <span class="cell-note">Aperture > threshold during bilabials</span>
+                        </div>
+                    </div>
+
+                    <!-- Explicit Academic Caveat Banner -->
+                    <div class="caveat-box">
+                        <div class="caveat-icon">
+                            <i class="fa-solid fa-flask-vial"></i>
+                        </div>
+                        <div class="caveat-content">
+                            <h4>Academic Research Prototype Notice</h4>
+                            <p>
+                                This offline analysis tool is a research prototype, not an enterprise production security system.
+                                Across held-out benchmark evaluations, the deployed constrained late-fusion model demonstrates an Equal Error Rate (EER) of
+                                <span class="caveat-highlight">36.02%</span> and a 5-fold cross-validation mean ROC-AUC of 
+                                <span class="caveat-highlight">0.6877 ± 0.0449</span>.
+                                Probability scores reflect experimental acoustic-viseme and visual trajectory fusion; they must not be treated as an infallible automated decision boundary.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Raw JSON Response -->
+                    <details class="raw-json-details">
+                        <summary><i class="fa-solid fa-code"></i> View Raw Server JSON Response</summary>
+                        <pre id="rawJsonResponse" class="raw-json-pre">{}</pre>
+                    </details>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Client-Side Controller -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropzone = document.getElementById("dropzone");
+            const fileInput = document.getElementById("videoFileInput");
+            const dropzoneTitle = document.getElementById("dropzoneTitle");
+            const dropzoneSub = document.getElementById("dropzoneSub");
+            const fileBadge = document.getElementById("fileBadge");
+            const fileNameDisplay = document.getElementById("fileNameDisplay");
+            const transcriptInput = document.getElementById("transcriptInput");
+            const btnRunAnalysis = document.getElementById("btnRunAnalysis");
+
+            const placeholderState = document.getElementById("placeholderState");
+            const loadingState = document.getElementById("loadingState");
+            const resultsContent = document.getElementById("resultsContent");
+            const loadingStatusText = document.getElementById("loadingStatusText");
+
+            const probPercentDisplay = document.getElementById("probPercentDisplay");
+            const verdictTextBadge = document.getElementById("verdictTextBadge");
+            const probBarFill = document.getElementById("probBarFill");
+            const probBarMarker = document.getElementById("probBarMarker");
+
+            const metricPVis = document.getElementById("metricPVis");
+            const metricPDesync = document.getElementById("metricPDesync");
+            const metricDesyncNote = document.getElementById("metricDesyncNote");
+            const metricSDesync = document.getElementById("metricSDesync");
+            const metricClosureRatio = document.getElementById("metricClosureRatio");
+            const rawJsonResponse = document.getElementById("rawJsonResponse");
+
+            let selectedFile = null;
+
+            // File selection via dropzone click
+            dropzone.addEventListener("click", () => fileInput.click());
+
+            // Drag and drop handlers
+            dropzone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropzone.classList.add("dragover");
+            });
+
+            dropzone.addEventListener("dragleave", () => {
+                dropzone.classList.remove("dragover");
+            });
+
+            dropzone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropzone.classList.remove("dragover");
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener("change", (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                selectedFile = file;
+                fileNameDisplay.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                fileBadge.classList.remove("hidden");
+                dropzoneTitle.textContent = "Video Selected";
+                dropzoneSub.textContent = "Click or drag another file to replace";
+                btnRunAnalysis.disabled = false;
+            }
+
+            // Run Analysis Handler
+            btnRunAnalysis.addEventListener("click", async () => {
+                if (!selectedFile) return;
+
+                // UI loading state
+                btnRunAnalysis.disabled = true;
+                placeholderState.classList.add("hidden");
+                resultsContent.classList.add("hidden");
+                loadingState.classList.remove("hidden");
+                loadingStatusText.textContent = "Uploading video & executing 3D facial landmark inference...";
+
+                const formData = new FormData();
+                formData.append("video", selectedFile);
+
+                const transcriptVal = transcriptInput.value.trim();
+                if (transcriptVal) {
+                    formData.append("expected_transcript", transcriptVal);
+                }
+
+                try {
+                    const response = await fetch("/analyze-offline-video", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({ detail: "Server error" }));
+                        throw new Error(errData.detail || `Server returned status ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    renderResults(data);
+                } catch (err) {
+                    alert(`Analysis failed: ${err.message}`);
+                    placeholderState.classList.remove("hidden");
+                } finally {
+                    loadingState.classList.add("hidden");
+                    btnRunAnalysis.disabled = false;
+                }
+            });
+
+            function renderResults(data) {
+                resultsContent.classList.remove("hidden");
+
+                const hasProb = typeof data.deepfake_probability === "number";
+                const pFake = hasProb ? data.deepfake_probability : null;
+                const pFakePct = hasProb ? (pFake * 100).toFixed(2) : null;
+
+                // Probability number and badge
+                if (hasProb) {
+                    probPercentDisplay.textContent = `${pFakePct}% P(fake)`;
+                } else {
+                    probPercentDisplay.textContent = "REJECTED";
+                }
+                verdictTextBadge.textContent = data.verdict_text || "UNKNOWN_VERDICT";
+
+                // Color tint for verdict text badge
+                if (data.verdict_text && data.verdict_text.includes("DEEPFAKE")) {
+                    verdictTextBadge.style.color = "#f43f5e";
+                    verdictTextBadge.style.borderColor = "rgba(244, 63, 94, 0.4)";
+                    verdictTextBadge.style.background = "rgba(244, 63, 94, 0.12)";
+                } else if (data.verdict_text && data.verdict_text.includes("REJECTED")) {
+                    verdictTextBadge.style.color = "#f59e0b";
+                    verdictTextBadge.style.borderColor = "rgba(245, 158, 11, 0.4)";
+                    verdictTextBadge.style.background = "rgba(245, 158, 11, 0.12)";
+                } else {
+                    verdictTextBadge.style.color = "#10b981";
+                    verdictTextBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
+                    verdictTextBadge.style.background = "rgba(16, 185, 129, 0.12)";
+                }
+
+                // Probability Bar Fill & Marker
+                if (hasProb) {
+                    const clampedPct = Math.min(Math.max(pFake * 100, 0), 100);
+                    probBarFill.style.width = `${clampedPct}%`;
+                    probBarMarker.style.display = "block";
+                    probBarMarker.style.left = `calc(${clampedPct}% - 2px)`;
+                } else {
+                    probBarFill.style.width = "0%";
+                    probBarMarker.style.display = "none";
+                }
+
+                // Metrics Grid
+                metricPVis.textContent = typeof data.p_visual === "number" ? data.p_visual.toFixed(4) : "--";
+
+                if (typeof data.p_desync === "number") {
+                    metricPDesync.textContent = data.p_desync.toFixed(4);
+                    metricDesyncNote.textContent = "DesyncOnlyNet evaluated";
+                } else if (data.verdict_text && data.verdict_text.includes("REJECTED")) {
+                    metricPDesync.textContent = "Aborted";
+                    metricDesyncNote.textContent = data.acoustic_cer ? `Acoustic Mismatch (CER: ${data.acoustic_cer.toFixed(2)})` : "Zero bilabials detected";
+                } else {
+                    metricPDesync.textContent = "Skipped";
+                    metricDesyncNote.textContent = "No transcript provided";
+                }
+
+                if (typeof data.desync_score === "number") {
+                    metricSDesync.textContent = data.desync_score.toFixed(4);
+                } else {
+                    metricSDesync.textContent = "N/A";
+                }
+
+                if (typeof data.failed_closure_ratio === "number") {
+                    metricClosureRatio.textContent = data.failed_closure_ratio.toFixed(4);
+                } else {
+                    metricClosureRatio.textContent = "N/A";
+                }
+
+                // Update latency pill with real server benchmark
+                if (typeof data.latency_ms === "number") {
+                    const offlineLatencyText = document.getElementById("offlineLatencyText");
+                    if (offlineLatencyText) {
+                        offlineLatencyText.textContent = `< ${data.latency_ms} ms (${data.per_frame_latency_ms} ms/frame)`;
+                    }
+                }
+
+                // Raw JSON display
+                rawJsonResponse.textContent = JSON.stringify(data, null, 2);
+            }
+        });
+    </script>
+</body>
+</html>
